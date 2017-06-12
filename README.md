@@ -45,18 +45,16 @@ enabled. By default, sshd is configured but not enabled.
 ## Dotfiles
 
 Ansible expects that the user wishes to clone dotfiles via the git repository
-specified via the `dotfiles.url` variable and install them with [rcm][5]. If
-this is not the case, removing the `dotfiles` variable will cause the relevant
-tasks to be skipped.
+specified via the `dotfiles.url` variable and install them with [rcm][5]. The
+destination to clone the repository to is defined by the `dotfiles.destination`
+variable. This is relative the user's home directory.
+
+These tasks will be skipped if the `dotfiles` variable is not defined.
 
 ## Tagging
 
 All tasks are tagged with their role, allowing them to be skipped by tag in
-addition to modifying `playbook.yml`. For instance, a system could be built
-excluding the entire `media` role and the `slim` section of the `x`
-role.
-
-    # ansible-playbook -i localhost playbook.yml --skip-tags "media,slim"
+addition to modifying `playbook.yml`.
 
 ## AUR
 
@@ -95,6 +93,13 @@ when appropriate. For every profile located in `/usr/local/etc/firejail`, the
 script looks for a profile with the same name in `~/.config/firejail`. If one
 is not found, it will create a profile that simply includes the system profile,
 as in the third example above. It will not modify any existing user profiles.
+
+### Blacklisting
+
+The `firejail.blacklist` variable is used to generate a list of blacklisted
+files and directories at `/usr/local/etc/firejail/disable-more.inc`. This file
+is included in most of the provided security profiles, causing those locations
+to be inaccessible to jailed programs.
 
 ## MAC Spoofing
 
@@ -218,9 +223,32 @@ variable from `trusted` to `all`.
 If the `tarsnapper.tarsnap.run_on` variable is set to anything other than
 `trusted` or `all`, the timer will never be activated.
 
+
+## Tor
+
+[Tor][22] is installed by default. A systemd service unit for Tor is installed,
+but not enabled or started. instead, the service is added to
+`/usr/local/etc/trusted_units`, causing the NetworkManager trusted unit
+dispatcher to activate the service whenever a connection is established to a
+trusted network. The service is stopped whenever the network goes down or a
+connection is established to an untrusted network.
+
+To have the service activated at boot, change the `tor.run_on` variable
+from `trusted` to `all`.
+
+If you do not wish to use Tor, simply remove the `tor` variable from the
+configuration.
+
+### parcimonie.sh
+
+[parcimonie.sh][23] is provided to periodically refresh entries in the user's
+GnuPG keyring over the Tor network. The service is added to
+`/usr/local/etc/trusted_units` and respects the `tor.run_on` variable.
+
+
 ## BitlBee
 
-[BitlBee][22] and [WeeChat][23] are used to provide chat services. A systemd
+[BitlBee][24] and [WeeChat][25] are used to provide chat services. A systemd
 service unit for BitlBee is installed, but not enabled or started by default.
 Instead, the service is added to `/usr/local/etc/trusted_units`, causing the
 NetworkManager trusted unit dispatcher to activate the service whenever a
@@ -233,9 +261,13 @@ from `trusted` to `all`.
 If the `bitlbee.run_on` variable is set to anything other than `trusted` or
 `all`, the service will never be activated.
 
+By default BitlBee will be configured to proxy through Tor. To disable this,
+remove the `bitlebee.torify` variable or disable Tor entirely by removing the
+`tor` variable.
+
 ## git-annex
 
-[git-annex][24] is installed for file syncing. A systemd service unit for the
+[git-annex][26] is installed for file syncing. A systemd service unit for the
 git-annex assistant is enabled and started by default. To prevent this, remove
 the `gitannex` variable from the config.
 
@@ -255,7 +287,7 @@ networks.
 
 ## PostgreSQL
 
-[PostgreSQL][25] is installed and enabled by default. If the
+[PostgreSQL][27] is installed and enabled by default. If the
 `postgresql.enable` variable is set to anything other than `True` or is not
 defined, the service will not be started or enabled.
 
@@ -266,6 +298,31 @@ PostgreSQL service is not added to `/usr/local/etc/trusted_units`.
 
 Additional configuration options are set which improve performance but make the
 database service inappropriate for production use.
+
+## Himawaripy
+
+[Himawaripy][28] is provided to fetch near-realtime photos of Earth from the
+Japanese [Himawari 8][29] weather satellite and set them as the user's desktop
+background via feh. This should provide early warning of the presence of any
+Vogon constructor fleets appearing over the Eastern Hemisphere.
+
+A systemd service unit and timer is installed, but not enabled or started by
+default. Instead, the service is added to `/usr/local/etc/trusted_units`,
+causing the NetworkManager trusted unit dispatcher to activate the service
+whenever a connection is established to a trusted network. The service is
+stopped whenever the network goes down or a connection is established to an
+untrusted network.
+
+To have the service activated at boot, change the `himawaripy.run_on` variable
+from `trusted` to `all`.
+
+If the `himawaripy.run_on` variable is set to anything other than `trusted` or
+`all`, the service will never be activated.
+
+By default the timer is scheduled to fetch a new image at 15 minute intervals.
+This can be changed by modifying the `himawaripy.run_time` variable.
+
+By completely removing the `himawaripy` variable, no related tasks will be run.
 
 
 [1]: http://www.ansible.com
@@ -289,7 +346,11 @@ database service inappropriate for production use.
 [19]: https://www.tarsnap.com/
 [20]: https://www.tarsnap.com/gettingstarted.html
 [21]: https://github.com/miracle2k/tarsnapper
-[22]: https://www.bitlbee.org/main.php/news.r.html
-[23]: https://weechat.org/
-[24]: https://git-annex.branchable.com/
-[25]: http://www.postgresql.org/
+[22]: https://www.torproject.org/
+[23]: https://github.com/EtiennePerot/parcimonie.sh
+[24]: https://www.bitlbee.org/main.php/news.r.html
+[25]: https://weechat.org/
+[26]: https://git-annex.branchable.com/
+[27]: http://www.postgresql.org/
+[28]: https://github.com/boramalper/himawaripy
+[29]: https://en.wikipedia.org/wiki/Himawari_8

@@ -22,6 +22,12 @@
     - zathura-pdf-mupdf
     - zathura-ps
 
+- name: Set Zathura as default PDF viewer
+  lineinfile: dest=/etc/xdg/mimeapps.list
+              regexp=^application/pdf
+              state=present
+              line="application/pdf=zathura.desktop"
+
 - name: Jail Zathura
   file: src=/usr/bin/firejail
         dest=/usr/local/bin/zathura
@@ -45,8 +51,11 @@
 - name: Install pandoc
   pacman: name=pandoc state=present
 
-- name: Install masterpdfeditor-qt5
-  aur: name=masterpdfeditor-qt5 user={{ user.name }}
+- name: Install texlive-core
+  pacman: name=texlive-core state=present
+
+- name: Install masterpdfeditor
+  aur: name=masterpdfeditor user={{ user.name }}
   tags:
     - aur
 

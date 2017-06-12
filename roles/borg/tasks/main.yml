@@ -1,0 +1,11 @@
+---
+- name: Install borg
+  pacman: name={{ item }} state=present
+  with_items:
+    - python-llfuse
+    - borg
+
+- name: Install borgmatic
+  aur: name=borgmatic user={{ user.name }}
+  tags:
+    - aur

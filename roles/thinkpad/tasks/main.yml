@@ -1,17 +1,8 @@
 ---
-- name: Install Synaptics input driver
-  pacman: name=xf86-input-synaptics state=present
-  tags:
-    - synaptics
-
-- name: Copy Synaptics configuration file
-  copy: src=50-synaptics.conf dest=/etc/X11/xorg.conf.d/50-synaptics.conf
-  tags:
-    - synaptics
-
 - name: Install acpi_call for TLP battery functions
-  pacman: name=acpi_call state=present
+  aur: name=acpi_call-dkms user={{ user.name }}
   tags:
+    - aur
     - battery
 
 - name: Install tpacpi-bat
@@ -34,3 +25,8 @@
   template: src=pam.d/i3lock.j2 dest=/etc/pam.d/i3lock
   tags:
     - fingerprint
+
+- name: Push trackpoint udev rules
+  copy: src=10-trackpoint.rules dest=/etc/udev/rules.d/10-trackpoint.rules
+  tags:
+    - trackpoint

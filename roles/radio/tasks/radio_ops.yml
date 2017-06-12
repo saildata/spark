@@ -4,21 +4,20 @@
   with_items:
     - cty
     - fldigi
+    - flrig
   tags:
     - aur
 
 - name: Install wsjtx
-  aur: name={{ item }} user={{ user.name }}
-  with_items:
-    - kvasd-bin
-    - wsjtx
+  aur: name=wsjtx user={{ user.name }}
   tags:
     - aur
 
-- name: Install tucnak3
-  aur: name={{ item }} user={{ user.name }}
-  with_items:
-    - libzia3
-    - tucnak3
-  tags:
-    - aur
+# tucnak3 replaced by tucnak4 upstream but no AUR package yet
+#- name: Install tucnak3
+#  aur: name={{ item }} user={{ user.name }}
+#  with_items:
+#    - libzia3
+#    - tucnak3
+#  tags:
+#    - aur
